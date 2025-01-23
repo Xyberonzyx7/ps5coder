@@ -48,8 +48,8 @@ MODE_INSERT = 1
 current_mode = MODE_MOUSE
 
 # Sensitivity settings
-MOUSE_SENSITIVITY = 10
-SCROLL_SENSITIVITY = 500
+MOUSE_SENSITIVITY = 90
+SCROLL_SENSITIVITY = 400
 JOYSTICK_DEADZONE = 0.2
 
 # Character mappings for Insert Mode
@@ -92,14 +92,13 @@ def handle_mouse_mode():
     # Cross button simulates mouse click
     if joystick.get_button(BUTTON_CROSS):
         pyautogui.click()
-        # time.sleep(0.2)  # Debounce delay
 
     # Right joystick controls scrolling
     scroll_y = joystick.get_axis(AXIS_RSV)
     if abs(scroll_y) > JOYSTICK_DEADZONE:
         pyautogui.scroll(int(-scroll_y * SCROLL_SENSITIVITY))
 
-    time.sleep(0.01)  # Debounce delay
+    # time.sleep(0.01)  # Debounce delay
 
 def handle_insert_mode():
     """Handle character insertion."""
