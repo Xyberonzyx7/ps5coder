@@ -201,7 +201,7 @@ def main():
     try:
         while True:
             pygame.event.pump()
-            if joystick.get_button(BUTTON_PS):
+            if joystick.get_button(BUTTON_RB):
                 current_mode = MODE_INSERT if current_mode == MODE_MOUSE else MODE_MOUSE
                 mode_name = "Insert Mode" if current_mode == MODE_INSERT else "Mouse Mode"
                 print(f"Switched to {mode_name}")
