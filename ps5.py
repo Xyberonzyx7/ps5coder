@@ -160,6 +160,7 @@ def handle_insert_mode():
     ry = round(ry, 1)
 
     shift_pressed = joystick.get_axis(AXIS_LT) > 0.5
+    space_pressed = joystick.get_axis(AXIS_RT) > 0.5
     control_pressed = joystick.get_button(BUTTON_LB)
     share_press = joystick.get_button(BUTTON_SHARE)  # Detect if Share button is pressed (Alt)
     esc_press = joystick.get_button(BUTTON_OPTIONS)
@@ -185,7 +186,7 @@ def handle_insert_mode():
             pyautogui.press('backspace')
     if joystick.get_button(BUTTON_CIRCLE):
         pyautogui.press('enter')
-    if joystick.get_button(BUTTON_CROSS):
+    if joystick.get_button(BUTTON_CROSS) or space_pressed:
         pyautogui.press('space')
     if joystick.get_button(BUTTON_SQUARE):
         pyautogui.press('tab')
