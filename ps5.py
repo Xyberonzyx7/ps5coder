@@ -149,26 +149,11 @@ def handle_mouse_mode():
         pyautogui.scroll(int(-scroll_y * SCROLL_SENSITIVITY))
 
 def handle_insert_mode():
-    """Handle character insertion."""
-    lx = joystick.get_axis(AXIS_LSH)  # Get the x-axis value
-    ly = joystick.get_axis(AXIS_LSV)  # Get the y-axis value
-    rx = joystick.get_axis(AXIS_RSH)  # Get the x-axis value
-    ry = joystick.get_axis(AXIS_RSV)  # Get the y-axis value
-    lx = round(lx, 1)
-    ly = round(ly, 1)
-    rx = round(rx, 1)
-    ry = round(ry, 1)
 
-    shift_pressed = joystick.get_axis(AXIS_LT) > 0.5
-    space_pressed = joystick.get_axis(AXIS_RT) > 0.5
     control_pressed = joystick.get_button(BUTTON_LB)
     share_press = joystick.get_button(BUTTON_SHARE)  # Detect if Share button is pressed (Alt)
     esc_press = joystick.get_button(BUTTON_OPTIONS)
-    lsection = get_section(lx, ly)
-    rsection = get_section(rx, ry)
-    character = get_character(lsection, rsection, shift_pressed)
-    if character:
-        pyautogui.write(character)
+    space_pressed = joystick.get_axis(AXIS_RT) > 0.5
     
     # Handle special buttons
     if joystick.get_button(BUTTON_UP):
@@ -194,6 +179,26 @@ def handle_insert_mode():
         pyautogui.hotkey('ctrl', 's')  # Save a file
     if esc_press:
         pyautogui.press('esc')
+
+    """Handle character insertion."""
+    lx = joystick.get_axis(AXIS_LSH)  # Get the x-axis value
+    ly = joystick.get_axis(AXIS_LSV)  # Get the y-axis value
+    rx = joystick.get_axis(AXIS_RSH)  # Get the x-axis value
+    ry = joystick.get_axis(AXIS_RSV)  # Get the y-axis value
+    lx = round(lx, 1)
+    ly = round(ly, 1)
+    rx = round(rx, 1)
+    ry = round(ry, 1)
+
+    if (abs(lx) <= JOYSTICK_DEADZONE and abs(ly) <= JOYSTICK_DEADZONE) or (abs(rx) <= JOYSTICK_DEADZONE and abs(ry) <= JOYSTICK_DEADZONE):
+        return
+
+    shift_pressed = joystick.get_axis(AXIS_LT) > 0.5
+    lsection = get_section(lx, ly)
+    rsection = get_section(rx, ry)
+    character = get_character(lsection, rsection, shift_pressed)
+    if character:
+        pyautogui.write(character)
     time.sleep(0.1)  # Debounce delay
 
 def main():
