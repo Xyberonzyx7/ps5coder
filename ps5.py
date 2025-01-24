@@ -27,12 +27,12 @@ BUTTON_PS = 5
 BUTTON_OPTIONS = 6
 BUTTON_LS = 7  # Left joystick click
 BUTTON_RS = 8  # Right joystick click
-BUTTON_LB = 9  # Left button
-BUTTON_RB = 10  # Right button
-BUTTON_UP = 11
-BUTTON_DOWN = 12
-BUTTON_LEFT = 13
-BUTTON_RIGHT = 14
+BUTTON_LB = 9  # Left button (Control)
+BUTTON_RB = 10  # Right button (Right key)
+BUTTON_UP = 11  # Up key
+BUTTON_DOWN = 12  # Down key
+BUTTON_LEFT = 13  # Left key
+BUTTON_RIGHT = 14  # Right key
 BUTTON_TOUCHPAD = 15
 BUTTON_MIC = 16
 
@@ -40,7 +40,7 @@ AXIS_LSH = 0  # Left joystick horizontal
 AXIS_LSV = 1  # Left joystick vertical
 AXIS_RSH = 2  # Right joystick horizontal
 AXIS_RSV = 3  # Right joystick vertical
-AXIS_LT = 4   # Left trigger
+AXIS_LT = 4   # Left trigger (Shift)
 AXIS_RT = 5   # Right trigger
 
 # Mode definitions
@@ -55,27 +55,37 @@ JOYSTICK_DEADZONE = 0.2
 
 # Define character sections
 sections = {
-    1: 'abcdefgh',
-    2: 'ijklmnop',
-    3: 'qrstuvwx',
-    4: 'yz012345',
-    5: '6789!@#$',
-    6: '%^&*()-_',
-    7: '=+[]{}\\|',
-    8: ';:\'",<.>/?`~'
+    1: 'abcdefg',
+    2: 'hijklmn',
+    3: 'opqrstu',
+    4: 'vwxyz01',
+    5: '2345678',
+    6: '9,./;\'[',
+    7: ']\-=`  ',
+}
+
+# Shift mappings for QWERTY layout
+shifted_sections = {
+    1: 'ABCDEFG',
+    2: 'HIJKLMN',
+    3: 'OPQRSTU',
+    4: 'VWXYZ)!',
+    5: '@#$%^&*',
+    6: '(<>?:"{',
+    7: '}|_+~  ',
 }
 
 # Define the joystick angle ranges for each section (in radians)
 section_angles = {
-    1: (-math.pi, -math.pi + math.pi / 4),      
-    2: (-math.pi + math.pi / 4, -math.pi / 2),  
-    3: (-math.pi / 2, -math.pi / 4),  
-    4: (-math.pi / 4, 0),  
-    5: (0, math.pi / 4),  
-    6: (math.pi / 4, math.pi / 2),  
-    7: (math.pi / 2, math.pi - math.pi / 4),  
-    8: (math.pi - math.pi / 4, math.pi),  
+    1: (-math.pi, -5 * math.pi / 7),      
+    2: (-5 * math.pi / 7, -3 * math.pi / 7),  
+    3: (-3 * math.pi / 7, -math.pi / 7),  
+    4: (-math.pi / 7, math.pi / 7),  
+    5: (math.pi / 7, 3 * math.pi / 7),  
+    6: (3 * math.pi / 7, 5 * math.pi / 7),  
+    7: (5 * math.pi / 7, math.pi),
 }
+
 # Helper function to get the angle of the joystick
 def get_joystick_angle(x, y):
     if abs(x) <= JOYSTICK_DEADZONE and abs(y) <= JOYSTICK_DEADZONE:
@@ -94,12 +104,11 @@ def get_section(x, y):
     return None
 
 # Helper function to map joystick input to a character within the section
-def get_character(lsection, rsection):
+def get_character(lsection, rsection, shift_pressed):
     if not lsection or not rsection:
         return None
-    print(f"lsection = {lsection}, rsection = {rsection}")
-    characters = sections[lsection] # use 'Key' to find a collection
-    character = characters[rsection - 1] # use 'index' to find a character in a collection
+    characters = shifted_sections[lsection] if shift_pressed else sections[lsection]
+    character = characters[rsection - 1]  # use 'index' to find a character in a collection
     if not character:
         return None
     return character
@@ -132,11 +141,31 @@ def handle_insert_mode():
     rx = round(rx, 1)
     ry = round(ry, 1)
 
+    shift_pressed = joystick.get_axis(AXIS_LT) > 0.5
+    control_pressed = joystick.get_button(BUTTON_LB)
     lsection = get_section(lx, ly)
     rsection = get_section(rx, ry)
-    character = get_character(lsection, rsection)
+    character = get_character(lsection, rsection, shift_pressed)
     if character:
         pyautogui.write(character)
+    
+    # Handle special buttons
+    if joystick.get_button(BUTTON_UP):
+        pyautogui.press('up')
+    if joystick.get_button(BUTTON_DOWN):
+        pyautogui.press('down')
+    if joystick.get_button(BUTTON_LEFT):
+        pyautogui.press('left')
+    if joystick.get_button(BUTTON_RIGHT):
+        pyautogui.press('right')
+    if joystick.get_button(BUTTON_TRIANGLE):
+        pyautogui.press('backspace')
+    if joystick.get_button(BUTTON_CIRCLE):
+        pyautogui.press('enter')
+    if joystick.get_button(BUTTON_CROSS):
+        pyautogui.press('space')
+    if joystick.get_button(BUTTON_SQUARE):
+        pyautogui.press('tab')
     time.sleep(0.1)  # Debounce delay
 
 def main():
