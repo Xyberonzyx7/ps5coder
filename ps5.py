@@ -51,7 +51,7 @@ current_mode = MODE_MOUSE
 # Sensitivity settings
 MOUSE_SENSITIVITY = 90
 SCROLL_SENSITIVITY = 400
-JOYSTICK_DEADZONE = 0.2
+JOYSTICK_DEADZONE = 0.3
 
 # Define character sections
 sections = {
@@ -114,13 +114,8 @@ def get_character(lsection, rsection, shift_pressed):
     return character
 
 def handle_mouse_mode():
-    """Handle mouse movement, clicking, and scrolling."""
-    # Left joystick controls mouse movement
-    x = joystick.get_axis(AXIS_LSH)
-    y = joystick.get_axis(AXIS_LSV)
+
     control_pressed = joystick.get_button(BUTTON_LB)
-    if abs(x) > JOYSTICK_DEADZONE or abs(y) > JOYSTICK_DEADZONE:
-        pyautogui.moveRel(x * MOUSE_SENSITIVITY, y * MOUSE_SENSITIVITY)
 
     # Handle special buttons
     if joystick.get_button(BUTTON_UP):
@@ -143,6 +138,13 @@ def handle_mouse_mode():
     if joystick.get_button(BUTTON_SQUARE):
         pyautogui.press('tab')
 
+    """Handle mouse movement, clicking, and scrolling."""
+    # Left joystick controls mouse movement
+    x = joystick.get_axis(AXIS_LSH)
+    y = joystick.get_axis(AXIS_LSV)
+
+    if abs(x) > JOYSTICK_DEADZONE or abs(y) > JOYSTICK_DEADZONE:
+        pyautogui.moveRel(x * MOUSE_SENSITIVITY, y * MOUSE_SENSITIVITY)
     # Right joystick controls scrolling
     scroll_y = joystick.get_axis(AXIS_RSV)
     if abs(scroll_y) > JOYSTICK_DEADZONE:
@@ -199,7 +201,7 @@ def handle_insert_mode():
     character = get_character(lsection, rsection, shift_pressed)
     if character:
         pyautogui.write(character)
-    time.sleep(0.1)  # Debounce delay
+    time.sleep(0.2)  # Debounce delay
 
 def main():
     global current_mode
