@@ -197,20 +197,26 @@ def handle_insert_mode():
 
 def main():
     global current_mode
-    print("Press the PS button to switch modes. Press Ctrl+C to quit.")
+    running = True
+    print("Press the BUTTON_RB button to switch modes. Press Ctrl+C to quit.")
     try:
         while True:
             pygame.event.pump()
-            if joystick.get_button(BUTTON_RB):
-                current_mode = MODE_INSERT if current_mode == MODE_MOUSE else MODE_MOUSE
-                mode_name = "Insert Mode" if current_mode == MODE_INSERT else "Mouse Mode"
-                print(f"Switched to {mode_name}")
+            if joystick.get_button(BUTTON_PS):
+                running = not running  # Toggle the running state
+                print("Paused" if not running else "Resumed")
                 time.sleep(0.5)  # Debounce delay
-            if current_mode == MODE_MOUSE:
-                handle_mouse_mode()
-            elif current_mode == MODE_INSERT:
-                handle_insert_mode()
-            time.sleep(0.01)  # Polling delay
+            if running:
+                if joystick.get_button(BUTTON_RB):
+                    current_mode = MODE_INSERT if current_mode == MODE_MOUSE else MODE_MOUSE
+                    mode_name = "Insert Mode" if current_mode == MODE_INSERT else "Mouse Mode"
+                    print(f"Switched to {mode_name}")
+                    time.sleep(0.5)  # Debounce delay
+                if current_mode == MODE_MOUSE:
+                    handle_mouse_mode()
+                elif current_mode == MODE_INSERT:
+                    handle_insert_mode()
+                time.sleep(0.01)  # Polling delay
     except KeyboardInterrupt:
         print("\nExiting program...")
     finally:
