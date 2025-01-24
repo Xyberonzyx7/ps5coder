@@ -1,6 +1,7 @@
 import pygame
 import pyautogui
 import time
+import math
 
 # Initialize Pygame
 pygame.init()
@@ -52,34 +53,56 @@ MOUSE_SENSITIVITY = 90
 SCROLL_SENSITIVITY = 400
 JOYSTICK_DEADZONE = 0.2
 
-# Character mappings for Insert Mode
-# Define mappings for joystick directions and button combinations
-char_map = {
-    (0, -1): 'w',  # Up
-    (0, 1): 's',   # Down
-    (-1, 0): 'a',  # Left
-    (1, 0): 'd',   # Right
-    (0, -1, BUTTON_LB): 'W',  # Shift + Up
-    (0, 1, BUTTON_LB): 'S',   # Shift + Down
-    (-1, 0, BUTTON_LB): 'A',  # Shift + Left
-    (1, 0, BUTTON_LB): 'D',   # Shift + Right
-    (0, -1, BUTTON_RB): '1',  # RB + Up
-    (0, 1, BUTTON_RB): '2',   # RB + Down
-    (-1, 0, BUTTON_RB): '3',  # RB + Left
-    (1, 0, BUTTON_RB): '4',   # RB + Right
-    # Add more mappings as needed
+# Define character sections
+sections = {
+    1: 'abcdefgh',
+    2: 'ijklmnop',
+    3: 'qrstuvwx',
+    4: 'yz012345',
+    5: '6789!@#$',
+    6: '%^&*()-_',
+    7: '=+[]{}\\|',
+    8: ';:\'",<.>/?`~'
 }
 
-def get_joystick_direction():
-    """Get the direction of the left joystick."""
-    x = joystick.get_axis(AXIS_LSH)
-    y = joystick.get_axis(AXIS_LSV)
-    direction = (0, 0)
-    if abs(x) > JOYSTICK_DEADZONE:
-        direction = (1 if x > 0 else -1, direction[1])
-    if abs(y) > JOYSTICK_DEADZONE:
-        direction = (direction[0], 1 if y > 0 else -1)
-    return direction
+# Define the joystick angle ranges for each section (in radians)
+section_angles = {
+    1: (-math.pi, -math.pi + math.pi / 4),      
+    2: (-math.pi + math.pi / 4, -math.pi / 2),  
+    3: (-math.pi / 2, -math.pi / 4),  
+    4: (-math.pi / 4, 0),  
+    5: (0, math.pi / 4),  
+    6: (math.pi / 4, math.pi / 2),  
+    7: (math.pi / 2, math.pi - math.pi / 4),  
+    8: (math.pi - math.pi / 4, math.pi),  
+}
+# Helper function to get the angle of the joystick
+def get_joystick_angle(x, y):
+    if abs(x) <= JOYSTICK_DEADZONE and abs(y) <= JOYSTICK_DEADZONE:
+        return None
+    angle = math.atan2(y, x)  # Compute the angle in radians
+    return angle
+
+# Helper function to map joystick input to a character section
+def get_section(x, y):
+    angle = get_joystick_angle(x, y)
+    if angle is None:
+        return None
+    for section, (start, end) in section_angles.items():
+        if start <= angle < end:
+            return section
+    return None
+
+# Helper function to map joystick input to a character within the section
+def get_character(lsection, rsection):
+    if not lsection or not rsection:
+        return None
+    print(f"lsection = {lsection}, rsection = {rsection}")
+    characters = sections[lsection] # use 'Key' to find a collection
+    character = characters[rsection - 1] # use 'index' to find a character in a collection
+    if not character:
+        return None
+    return character
 
 def handle_mouse_mode():
     """Handle mouse movement, clicking, and scrolling."""
@@ -98,23 +121,23 @@ def handle_mouse_mode():
     if abs(scroll_y) > JOYSTICK_DEADZONE:
         pyautogui.scroll(int(-scroll_y * SCROLL_SENSITIVITY))
 
-    # time.sleep(0.01)  # Debounce delay
-
 def handle_insert_mode():
     """Handle character insertion."""
-    direction = get_joystick_direction()
-    if direction != (0, 0):
-        for modifier, button in [('shift', BUTTON_LB), ('ctrl', BUTTON_RB)]:
-            if joystick.get_button(button):
-                key = char_map.get((*direction, button))
-                if key:
-                    pyautogui.write(key)
-                    time.sleep(0.2)  # Debounce delay
-                    return
-        key = char_map.get(direction)
-        if key:
-            pyautogui.write(key)
-            time.sleep(0.2)  # Debounce delay
+    lx = joystick.get_axis(AXIS_LSH)  # Get the x-axis value
+    ly = joystick.get_axis(AXIS_LSV)  # Get the y-axis value
+    rx = joystick.get_axis(AXIS_RSH)  # Get the x-axis value
+    ry = joystick.get_axis(AXIS_RSV)  # Get the y-axis value
+    lx = round(lx, 1)
+    ly = round(ly, 1)
+    rx = round(rx, 1)
+    ry = round(ry, 1)
+
+    lsection = get_section(lx, ly)
+    rsection = get_section(rx, ry)
+    character = get_character(lsection, rsection)
+    if character:
+        pyautogui.write(character)
+    time.sleep(0.1)  # Debounce delay
 
 def main():
     global current_mode
