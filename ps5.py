@@ -121,9 +121,26 @@ def handle_mouse_mode():
     if abs(x) > JOYSTICK_DEADZONE or abs(y) > JOYSTICK_DEADZONE:
         pyautogui.moveRel(x * MOUSE_SENSITIVITY, y * MOUSE_SENSITIVITY)
 
-    # Cross button simulates mouse click
+    # Handle special buttons
+    if joystick.get_button(BUTTON_UP):
+        pyautogui.press('up')
+    if joystick.get_button(BUTTON_DOWN):
+        pyautogui.press('down')
+    if joystick.get_button(BUTTON_LEFT):
+        pyautogui.press('left')
+    if joystick.get_button(BUTTON_RIGHT):
+        pyautogui.press('right')
+    if joystick.get_button(BUTTON_TRIANGLE):
+        if control_pressed:
+            pyautogui.hotkey('ctrl', 'backspace')  # Delete a word if control is pressed
+        else:
+            pyautogui.press('backspace')
+    if joystick.get_button(BUTTON_CIRCLE):
+        pyautogui.press('enter')
     if joystick.get_button(BUTTON_CROSS):
         pyautogui.click()
+    if joystick.get_button(BUTTON_SQUARE):
+        pyautogui.press('tab')
 
     # Right joystick controls scrolling
     scroll_y = joystick.get_axis(AXIS_RSV)
@@ -143,6 +160,8 @@ def handle_insert_mode():
 
     shift_pressed = joystick.get_axis(AXIS_LT) > 0.5
     control_pressed = joystick.get_button(BUTTON_LB)
+    share_press = joystick.get_button(BUTTON_SHARE)  # Detect if Share button is pressed (Alt)
+    esc_press = joystick.get_button(BUTTON_OPTIONS)
     lsection = get_section(lx, ly)
     rsection = get_section(rx, ry)
     character = get_character(lsection, rsection, shift_pressed)
@@ -159,13 +178,20 @@ def handle_insert_mode():
     if joystick.get_button(BUTTON_RIGHT):
         pyautogui.press('right')
     if joystick.get_button(BUTTON_TRIANGLE):
-        pyautogui.press('backspace')
+        if control_pressed:
+            pyautogui.hotkey('ctrl', 'backspace')  # Delete a word if control is pressed
+        else:
+            pyautogui.press('backspace')
     if joystick.get_button(BUTTON_CIRCLE):
         pyautogui.press('enter')
     if joystick.get_button(BUTTON_CROSS):
         pyautogui.press('space')
     if joystick.get_button(BUTTON_SQUARE):
         pyautogui.press('tab')
+    if share_press:
+        pyautogui.hotkey('ctrl', 's')  # Save a file
+    if esc_press:
+        pyautogui.press('esc')
     time.sleep(0.1)  # Debounce delay
 
 def main():
