@@ -118,6 +118,7 @@ def handle_mouse_mode():
     # Left joystick controls mouse movement
     x = joystick.get_axis(AXIS_LSH)
     y = joystick.get_axis(AXIS_LSV)
+    control_pressed = joystick.get_button(BUTTON_LB)
     if abs(x) > JOYSTICK_DEADZONE or abs(y) > JOYSTICK_DEADZONE:
         pyautogui.moveRel(x * MOUSE_SENSITIVITY, y * MOUSE_SENSITIVITY)
 
